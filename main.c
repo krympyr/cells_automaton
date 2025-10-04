@@ -1,6 +1,5 @@
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
-
+#define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
+#include <SDL3/SDL.h>
 /*#include <SDL_main.h>
 #include "D:/Dev/SDL-release-3.2.22/include/SDL3/SDL.h" */
 #include <stdio.h>
