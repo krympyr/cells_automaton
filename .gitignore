@@ -2,3 +2,4 @@
 *.dll
 /build*
 /vendored*
+/.DS_Store
