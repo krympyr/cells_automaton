@@ -1,21 +1,21 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
-/*#include <SDL_main.h>
-#include "D:/Dev/SDL-release-3.2.22/include/SDL3/SDL.h" */
+//#include <SDL_main.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 
 #define CELL 10
-#define BACKPANELPOINT 100
-#define COLUMNS 80
-#define ROWS 60
-
-#define WIDTHWINDOW ((CELL* COLUMNS)) + BACKPANELPOINT
-#define WIDTH (CELL * COLUMNS)
+#define DOWNPANELPOINT 50
+#define HEIGHTWINDOW 600
+#define WIDTHWINDOW 800
+#define COLUMNS (WIDTHWINDOW / CELL)
+#define ROWS (HEIGHTWINDOW - DOWNPANELPOINT) / CELL
 #define HEIGHT (CELL * ROWS)
+#define WIDTH (CELL * COLUMNS)
 #define LEN_TABLE (COLUMNS * ROWS)
 
 typedef struct { int x, y; } Point;
@@ -30,27 +30,43 @@ Point mouse_xy;
 int game_over = 0;
 int score = 0;
 
-void init_game() {
+int init_game() {
+
+    if (SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO) == 0) {
+        fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    win = SDL_CreateWindow("Cells_Authomaton - SDL3", WIDTHWINDOW, HEIGHTWINDOW, 0);
+    if (!win) { fprintf(stderr, "SDL_CreateWindow error: %s\n", SDL_GetError()); SDL_Quit(); return 1; }
+
+    ren = SDL_CreateRenderer(win, NULL);
+    if (!ren) { fprintf(stderr, "SDL_CreateRenderer error: %s\n", SDL_GetError()); SDL_DestroyWindow(win); SDL_Quit(); return 1; }
+    
     fronttable[0][1] = 1;
     fronttable[1][2] = 1;
     fronttable[2][0] = 1;
     fronttable[2][1] = 1;
-    fronttable[2][2] = 1;   
+    fronttable[2][2] = 1;
 
+    return 0;
 }
 
 void render() {
     // clear
-    SDL_SetRenderDrawColor(ren, 20, 20, 20, 255);
+    // SDL_SetRenderDrawColor(ren, 20, 20, 20, 255);
     SDL_RenderClear(ren);
 
     //draw FILL RECT
+    SDL_FRect r = {0, HEIGHT, WIDTHWINDOW, HEIGHTWINDOW};
+    SDL_SetRenderDrawColor(ren, 40, 40, 40, 255);
+    SDL_RenderFillRect(ren, &r);
     for (int x = 0; x < COLUMNS; x++) {
         for (int y = 0; y < ROWS; y++) {
             SDL_FRect r = { x * CELL, y * CELL, CELL, CELL };
             if (fronttable[x][y]) SDL_SetRenderDrawColor(ren, 30, 160, 30, 255);
             else SDL_SetRenderDrawColor(ren, 20, 20, 20, 255);
-            SDL_RenderFillRect(ren, &r);               
+            SDL_RenderFillRect(ren, &r);
         }
     }
 
@@ -60,7 +76,7 @@ void render() {
     for (int y = 0; y <= HEIGHT; y += CELL) SDL_RenderLine(ren, 0, y, WIDTH, y);
 
     SDL_RenderPresent(ren);
-}   
+}
 
 int mod(int a, int b)
 {
@@ -95,16 +111,6 @@ void update(void) {
 
 int main(int argc, char **argv) {
     bool loopShouldStop = false;
-    if (SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO) == 0) {
-        fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    win = SDL_CreateWindow("Cells_Authomaton - SDL3", WIDTHWINDOW, HEIGHT, 0);
-    if (!win) { fprintf(stderr, "SDL_CreateWindow error: %s\n", SDL_GetError()); SDL_Quit(); return 1; }
-
-    ren = SDL_CreateRenderer(win, NULL);
-    if (!ren) { fprintf(stderr, "SDL_CreateRenderer error: %s\n", SDL_GetError()); SDL_DestroyWindow(win); SDL_Quit(); return 1; }
 
     init_game();
 

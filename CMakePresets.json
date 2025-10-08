@@ -1,11 +1,27 @@
 {
     "version": 3,
-    "configurePresets": [{
-        "name": "default",
-        "binaryDir": "build"
-    }],
-    "buildPresets": [{
-        "name": "default",
-        "configurePreset": "default"
-    }]
+    "configurePresets": [
+        {
+            "name": "default",
+            "binaryDir": "build"
+        },
+        {
+            "name": "GCC 15.2.0 x86_64-w64-mingw32 (mingw64)",
+            "displayName": "GCC 15.2.0 x86_64-w64-mingw32 (mingw64)",
+            "description": "Using compilers: C = C:\\msys64\\mingw64\\bin\\gcc.exe, CXX = C:\\msys64\\mingw64\\bin\\g++.exe",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "C:/msys64/mingw64/bin/gcc.exe",
+                "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default"
+        }
+    ]
 }
