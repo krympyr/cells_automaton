@@ -9,6 +9,8 @@
 #include <time.h>
 #include <string.h>
 
+#include "./character.c"
+
 #define CELL 10
 #define DOWNPANELPOINT 50
 #define HEIGHTWINDOW 600
@@ -18,6 +20,8 @@
 #define HEIGHT (CELL * ROWS)
 #define WIDTH (CELL * COLUMNS)
 #define LEN_TABLE (COLUMNS * ROWS)
+#define CHARACTERS_LENGTH 30
+
 
 bool START = 0;
 SDL_Window *win = NULL;
