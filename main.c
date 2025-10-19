@@ -20,7 +20,7 @@
 #define HEIGHT (CELL * ROWS)
 #define WIDTH (CELL * COLUMNS)
 #define LEN_TABLE (COLUMNS * ROWS)
-#define CHARACTERS_LENGTH 30
+
 
 
 bool START = 0;
@@ -93,7 +93,20 @@ void render(void) {
             SDL_RenderFillRect(ren, &r);
         }
     }
-
+    Symbol sym;
+    sym = CHARACTERS[21];
+    SDL_SetRenderDrawColor(ren, 30, 160, 30, 255);
+    int rc = 2;
+    for (size_t y = 0; y < CHARHIGHT ; ++y){
+        for (size_t x = 0; x < CHARWIDTH; ++x){
+            if (sym.SYM[y][x]) {
+                //printf("sym.SYM\n");
+                SDL_FRect r = { (0 + 10 + x * rc), (HEIGHTWINDOW - 40 + y*rc), rc, rc }; 
+                //SDL_RenderPoint(ren, (WIDTHWINDOW + 10 + x), (HEIGHTWINDOW - 40 + y));
+                SDL_RenderFillRect(ren, &r);
+            }
+        }
+    }
     // draw grid (optional)
     SDL_SetRenderDrawColor(ren, 40, 40, 40, 255);
     for (int x = 0; x <= WIDTH; x += CELL) SDL_RenderLine(ren, x, 0, x, HEIGHT);
