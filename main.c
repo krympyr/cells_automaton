@@ -1,5 +1,6 @@
 #define SDL_MAIN_HANDLED
-#include <SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 //#include <SDL_main.h>
 
@@ -18,22 +19,29 @@
 #define WIDTH (CELL * COLUMNS)
 #define LEN_TABLE (COLUMNS * ROWS)
 
-typedef struct { int x, y; } Point;
-
 bool START = 0;
 SDL_Window *win = NULL;
 SDL_Renderer *ren = NULL;
+TTF_Font *font = NULL;
+TTF_Text *textObj = NULL;
 
 bool fronttable[COLUMNS][ROWS] = {0};
 bool backtable[COLUMNS][ROWS] = {0};
-Point mouse_xy;
+
 int game_over = 0;
 int score = 0;
 
 int init_game() {
 
     if (SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO) == 0) {
+        printf("SDL_Init error: %s", SDL_GetError());
         fprintf(stderr, "SDL_Init error: %s\n", SDL_GetError());
+        return 1;
+    }
+    if (TTF_Init() == 0) {
+        printf("TTF init error: %s", SDL_GetError());
+        fprintf(stderr,"TTF init error: %s", SDL_GetError());
+        SDL_Quit();
         return 1;
     }
 
@@ -42,7 +50,19 @@ int init_game() {
 
     ren = SDL_CreateRenderer(win, NULL);
     if (!ren) { fprintf(stderr, "SDL_CreateRenderer error: %s\n", SDL_GetError()); SDL_DestroyWindow(win); SDL_Quit(); return 1; }
-    
+
+    font = TTF_OpenFont("./fonts/arial.ttf", 24);
+    if (!font) {
+        fprintf(stderr,"Could not open font: %s", SDL_GetError());
+        // очистка и выход...
+    }
+    textObj = TTF_CreateText(NULL, font, "SPACE is RUN/STOP",5);
+    if (!textObj) {
+        printf("Could not create text: %s", SDL_GetError());
+        fprintf(stderr,"Could not create text: %s", SDL_GetError());
+        // очистка и выход...
+    }
+
     fronttable[0][1] = 1;
     fronttable[1][2] = 1;
     fronttable[2][0] = 1;
@@ -52,7 +72,7 @@ int init_game() {
     return 0;
 }
 
-void render() {
+void render(void) {
     // clear
     // SDL_SetRenderDrawColor(ren, 20, 20, 20, 255);
     SDL_RenderClear(ren);
@@ -75,7 +95,17 @@ void render() {
     for (int x = 0; x <= WIDTH; x += CELL) SDL_RenderLine(ren, x, 0, x, HEIGHT);
     for (int y = 0; y <= HEIGHT; y += CELL) SDL_RenderLine(ren, 0, y, WIDTH, y);
 
-    SDL_RenderPresent(ren);
+    //================Text
+
+    // if (!TTF_DrawRendererText(textObj, 50, 50)){
+    //     printf("Could not DrawRenderer text: %s", SDL_GetError());
+    //     fprintf(stderr,"Could not DrawRenderer text: %s", SDL_GetError());
+    // }
+// //============================= 
+    
+    if (!SDL_RenderPresent(ren)){
+        fprintf(stderr,"SDL_RenderPresent error: %s", SDL_GetError());
+    }
 }
 
 int mod(int a, int b)
@@ -111,8 +141,9 @@ void update(void) {
 
 int main(int argc, char **argv) {
     bool loopShouldStop = false;
-
+    
     init_game();
+    
 
     Uint32 last = SDL_GetTicks();
     const int tick_ms = 120; // speed
@@ -145,8 +176,6 @@ int main(int argc, char **argv) {
             }
         }
 
-        //SDL_RenderClear(ren);
-        //SDL_RenderPresent(ren);
         Uint32 now = SDL_GetTicks();
         if (now - last >= (Uint32)tick_ms) {
             if (START) {
@@ -163,9 +192,11 @@ int main(int argc, char **argv) {
 
     // game over message in console
     printf("Game Over! Score: %d\n", score);
-
+    TTF_DestroyText(textObj);
+    TTF_CloseFont(font);
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
+    TTF_Quit();
     SDL_Quit();
     return 0;
 }
