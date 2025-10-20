@@ -20,20 +20,69 @@
 #define HEIGHT (CELL * ROWS)
 #define WIDTH (CELL * COLUMNS)
 #define LEN_TABLE (COLUMNS * ROWS)
-
-
+#define DOWNMESSAGE "<KBD_SPACE> IS START STOP | <KBD_C> IS CLEAR PLOT | <BTN_MOUS> IS SET UNSET DOT"
+#define X_MESSAGE 5
+#define Y_MESSAGE 30
 
 bool START = 0;
 SDL_Window *win = NULL;
 SDL_Renderer *ren = NULL;
 TTF_Font *font = NULL;
 TTF_Text *textObj = NULL;
+SDL_FRect rect[1000] = {0};
 
+size_t mi = 0;
 bool fronttable[COLUMNS][ROWS] = {0};
 bool backtable[COLUMNS][ROWS] = {0};
 
 int game_over = 0;
 int score = 0;
+
+void CreateLettersISRects(Symbol sym, size_t xM, size_t yM ){
+    
+    for (size_t y = 0; y < CHARHIGHT ; ++y){
+        for (size_t x = 0; x < CHARWIDTH; ++x){
+            if (sym.SYM[y][x]) {
+                // message[mi].x = (0 + 10 + x * SIZEPOINTCHAR);
+                // message[mi].y = (HEIGHTWINDOW - 40 + y * SIZEPOINTCHAR);
+                //printf("sym.SYM\n");
+                rect[mi].h = SIZEPOINTCHAR; 
+                rect[mi].w = SIZEPOINTCHAR; 
+                rect[mi].x = (xM + x * SIZEPOINTCHAR); 
+                rect[mi].y = (HEIGHTWINDOW - yM + y * SIZEPOINTCHAR); 
+                mi += 1;
+                //SDL_RenderPoint(ren, (WIDTHWINDOW + 10 + x), (HEIGHTWINDOW - 40 + y));
+                //SDL_RenderFillRect(ren, &r);
+            }
+        }
+    }
+}
+
+void CreateMessageToRect(void){
+    //Symbol sym;
+    int xM = X_MESSAGE;
+    char mess[] = DOWNMESSAGE; 
+    //FindSymInALPHABET
+    for (size_t ms = 0; ms < sizeof(mess); ++ms){
+        
+        //printf("LETTER_OF_MESSAGE: %d", mess[ms]);
+        for (size_t ch = 0; ch < sizeof(CHARACTERS); ++ch){
+            if (mess[ms] == 32){
+                xM += CHARWIDTH;
+                break;                
+            }            if (CHARACTERS[ch].LETTER == mess[ms]){
+                //printf(" find_LETTER: %d\n", CHARACTERS[ch].LETTER);
+                CreateLettersISRects(CHARACTERS[ch], xM, Y_MESSAGE);
+                xM += CHARWIDTH;
+                break;
+            }
+            
+        }
+        xM += CHARWIDTH;// * SIZEPOINTCHAR;
+    }
+  
+}
+
 
 int init_game() {
 
@@ -66,7 +115,7 @@ int init_game() {
         fprintf(stderr,"Could not create text: %s", SDL_GetError());
         // очистка и выход...
     }
-
+    CreateMessageToRect();
     fronttable[0][1] = 1;
     fronttable[1][2] = 1;
     fronttable[2][0] = 1;
@@ -75,6 +124,8 @@ int init_game() {
 
     return 0;
 }
+
+
 
 void render(void) {
     // clear
@@ -93,20 +144,31 @@ void render(void) {
             SDL_RenderFillRect(ren, &r);
         }
     }
-    Symbol sym;
-    sym = CHARACTERS[21];
+    // Symbol sym;
+    // sym = CHARACTERS[21];
+//    SDL_FPoint message[1000] = {0};
+    
     SDL_SetRenderDrawColor(ren, 30, 160, 30, 255);
-    int rc = 2;
-    for (size_t y = 0; y < CHARHIGHT ; ++y){
-        for (size_t x = 0; x < CHARWIDTH; ++x){
-            if (sym.SYM[y][x]) {
-                //printf("sym.SYM\n");
-                SDL_FRect r = { (0 + 10 + x * rc), (HEIGHTWINDOW - 40 + y*rc), rc, rc }; 
-                //SDL_RenderPoint(ren, (WIDTHWINDOW + 10 + x), (HEIGHTWINDOW - 40 + y));
-                SDL_RenderFillRect(ren, &r);
-            }
-        }
-    }
+    // size_t mi = 0;
+    // for (size_t y = 0; y < CHARHIGHT ; ++y){
+    //     for (size_t x = 0; x < CHARWIDTH; ++x){
+    //         if (sym.SYM[y][x]) {
+    //             // message[mi].x = (0 + 10 + x * SIZEPOINTCHAR);
+    //             // message[mi].y = (HEIGHTWINDOW - 40 + y * SIZEPOINTCHAR);
+    //             //printf("sym.SYM\n");
+    //             rect[mi].h = SIZEPOINTCHAR; 
+    //             rect[mi].w = SIZEPOINTCHAR; 
+    //             rect[mi].x = (0 + 10 + x * SIZEPOINTCHAR); 
+    //             rect[mi].y = (HEIGHTWINDOW - 40 + y * SIZEPOINTCHAR); 
+    //             mi += 1;
+    //             //SDL_RenderPoint(ren, (WIDTHWINDOW + 10 + x), (HEIGHTWINDOW - 40 + y));
+    //             //SDL_RenderFillRect(ren, &r);
+    //         }
+    //     }
+    // }
+    //FindSymInALPHABET();
+    SDL_RenderRects(ren, rect, SDL_arraysize(rect));
+    //SDL_RenderPoints(ren, message, SDL_arraysize(message));
     // draw grid (optional)
     SDL_SetRenderDrawColor(ren, 40, 40, 40, 255);
     for (int x = 0; x <= WIDTH; x += CELL) SDL_RenderLine(ren, x, 0, x, HEIGHT);
